@@ -9,11 +9,20 @@ Chain CLI. Run commands in a terminal.
 cd ~/Desktop/script-chain-cli
 ```
 
-Python 3 is required. Check that it is available:
+Python 3.9 or newer is required. Check that it is available:
 
 ```bash
 python3 --version
 ```
+
+For the simplest setup, install the CLI from this folder:
+
+```bash
+python3 -m pip install .
+```
+
+After installation, run it with `script-chain`. If you prefer not to install it,
+use `python3 chain.py` in the commands below.
 
 ## 2. Add the scripts you want to run
 
@@ -65,8 +74,10 @@ can set an optional `"cwd"` on a step to change its working directory; relative
 From the project folder, run:
 
 ```bash
-python3 chain.py run pipeline.json
+script-chain run pipeline.json
 ```
+
+Without installing, run `python3 chain.py run pipeline.json` instead.
 
 You will see each step printed as it starts, followed by the script's output.
 The next step starts only after the current one succeeds. The pipeline stops
@@ -75,8 +86,11 @@ at the first failed command and prints the step name and exit status.
 You can also provide a pipeline path directly:
 
 ```bash
-python3 ~/Desktop/script-chain-cli/chain.py run ~/Desktop/script-chain-cli/pipeline.json
+script-chain run ~/Desktop/script-chain-cli/pipeline.json
 ```
+
+If you did not install the CLI, substitute
+`python3 ~/Desktop/script-chain-cli/chain.py run` for `script-chain run`.
 
 ## 5. Handle errors
 

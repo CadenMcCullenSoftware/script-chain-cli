@@ -1,55 +1,113 @@
 # Script Chain CLI
 
-A small, dependency-free Python CLI for running scripts in sequence. Each step
-gets its own command and arguments. The runner stops at the first failure and
-returns a non-zero exit status.
+A lightweight, dependency-free Python command-line tool for running scripts in
+sequence. Each step runs only after the previous step succeeds. If a command
+fails, the pipeline stops and returns a non-zero exit status.
 
-## Run a pipeline
+## Requirements
 
-Create a JSON file such as `pipeline.json`:
+- Python 3.9 or newer
+- Linux, macOS, or Windows
+
+## Install
+
+From the repository directory:
+
+```bash
+python3 -m pip install .
+```
+
+This installs the `script-chain` command. To install from a source checkout
+without installing:
+
+```bash
+python3 chain.py run examples/pipeline.json
+```
+
+## Quick start
+
+Run the included example pipeline from the repository directory:
+
+```bash
+script-chain run examples/pipeline.json
+```
+
+The example reads `examples/source.txt`, writes intermediate and report files
+under `examples/build/`, and prints progress as each step runs.
+
+## Create your own pipeline
+
+Create a JSON file with a `steps` list. Each step needs a `command` array:
 
 ```json
 {
   "steps": [
     {
-      "name": "prepare data",
+      "name": "Prepare data",
       "command": ["python3", "scripts/prepare.py", "--input", "source.csv"]
     },
     {
-      "name": "generate report",
+      "name": "Create report",
       "command": ["python3", "scripts/report.py", "--format", "html"]
     }
   ]
 }
 ```
 
-Then run:
+Run it with:
 
 ```bash
-python3 chain.py run pipeline.json
+script-chain run pipeline.json
 ```
 
-Commands run from the pipeline file's directory by default. Set `"cwd"` on a
-step to use a different working directory; relative paths are based on the
-pipeline file's directory:
+Commands are arrays of arguments, not shell command strings. Keep each argument
+as its own string; shell operators such as `|` and `&&` are not interpreted.
+This avoids accidental shell interpretation and supports arguments containing
+spaces.
+
+Commands run from the pipeline file's directory by default. Use the optional
+`cwd` field to select a different working directory for a step. Relative `cwd`
+paths are based on the pipeline file's directory; the command then runs inside
+that directory:
 
 ```json
 {
-  "name": "build",
-  "cwd": "app",
-  "command": ["python3", "build.py", "--release"]
+  "steps": [
+    {
+      "name": "Build app",
+      "cwd": "app",
+      "command": ["python3", "build.py", "--release"]
+    }
+  ]
 }
 ```
 
-Commands are argument arrays rather than shell strings, so spaces and special
-characters in arguments are passed safely without shell interpretation. Output
-from each script appears in the terminal. The first command that fails stops
-the pipeline and identifies the failing step.
+Step names are optional. If omitted, the CLI labels steps by number. Standard
+output and error from each command are shown in the terminal. The runner stops
+at the first unsuccessful command and returns its exit status (or `1` if it
+could not start).
+
+## Help
+
+```bash
+script-chain --help
+script-chain run --help
+```
 
 ## Tests
 
-Run the built-in tests with:
+Run the test suite from the repository directory:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
+
+## Repository guide
+
+- [`WORKFLOW.md`](WORKFLOW.md): user workflow and troubleshooting
+- [`examples/`](examples/): runnable sample pipeline and scripts
+- [`tests/`](tests/): automated tests
+
+## License
+
+This project is licensed under the Apache-2.0 license. See [`LICENSE`](LICENSE).

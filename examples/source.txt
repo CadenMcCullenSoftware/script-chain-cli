@@ -1,0 +1,3 @@
+Script Chain CLI
+Runs scripts in order
+Stops when a command fails

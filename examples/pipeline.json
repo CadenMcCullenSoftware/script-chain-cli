@@ -1,0 +1,26 @@
+{
+  "steps": [
+    {
+      "name": "Prepare example data",
+      "command": [
+        "python3",
+        "prepare.py",
+        "--input",
+        "source.txt",
+        "--output",
+        "build/prepared.txt"
+      ]
+    },
+    {
+      "name": "Create example report",
+      "command": [
+        "python3",
+        "report.py",
+        "--input",
+        "build/prepared.txt",
+        "--output",
+        "build/report.txt"
+      ]
+    }
+  ]
+}

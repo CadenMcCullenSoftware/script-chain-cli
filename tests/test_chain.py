@@ -69,6 +69,13 @@ class ChainCliTests(unittest.TestCase):
             self.assertIn("intentional failure exited with status 7", result.stderr)
             self.assertFalse(marker.exists())
 
+    def test_rejects_step_without_command(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            result = self.run_pipeline(Path(temporary_directory), [{"name": "missing command"}])
+
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("step 1 needs a non-empty string list in 'command'", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
