@@ -20,4 +20,4 @@ classifiers = [
 script-chain = "chain:main"
 
 [tool.setuptools]
-py-modules = ["chain"]
+py-modules = ["chain", "repos_catalog"]

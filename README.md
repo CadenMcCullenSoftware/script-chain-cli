@@ -35,6 +35,62 @@ script-chain run examples/pipeline.json
 The example reads `examples/source.txt`, writes intermediate and report files
 under `examples/build/`, and prints progress as each step runs.
 
+## Manage multiple repositories
+
+The `repos` commands use the included catalog, with optional persistent
+configuration under `~/.config/script-chain-cli/repos.json` (or
+`$XDG_CONFIG_HOME/script-chain-cli/repos.json`). Use `--config` on any `repos`
+subcommand to select another config file. For local operations, place each
+checkout under a workspace directory using its repository name (for example,
+`~/Projects/script-chain-cli`) and pass that directory with `--root`. An
+explicit configured checkout path can be set with `repos add --path`.
+
+```bash
+script-chain repos list
+script-chain repos status --root ~/Projects
+script-chain repos docs axiom-hive-code-review --root ~/Projects
+script-chain repos read-doc axiom-hive-code-review README.md --root ~/Projects
+script-chain repos checks --root ~/Projects
+script-chain repos add example-org/project --description "Example project"
+script-chain repos remove project
+script-chain repos discover --owner CadenMcCullenSoftware
+script-chain repos discover --owner CadenMcCullenSoftware --import
+```
+
+Discovery reads repository metadata using the authenticated GitHub CLI (`gh`);
+`--import` explicitly writes the discovered catalog to config. Inventory,
+status, and documentation commands are read-only. `repos checks` detects
+conventional test, lint, and build commands and only displays them by default.
+To execute checks, specify one or more repositories and explicitly pass
+`--run`. Use `--type` to limit the check categories:
+
+```bash
+script-chain repos checks script-chain-cli --root ~/Projects --run
+script-chain repos checks Delta-V1 --type lint --type test --root ~/Projects
+```
+
+Checks time out after five minutes. The CLI does not clone, fetch, or pull
+repositories and never runs checks across the whole catalog implicitly. Install
+the package to use the `script-chain` command, or run
+`python3 chain.py repos --help` from the source checkout.
+
+### Install for regular use
+
+Install from a local checkout:
+
+```bash
+python3 -m pip install .
+```
+
+Or install the GitHub project with `pipx` for an isolated command-line app:
+
+```bash
+pipx install git+https://github.com/CadenMcCullenSoftware/script-chain-cli.git
+```
+
+The GitHub CLI (`gh`) is only required for `repos discover`; other commands
+work offline against local checkouts.
+
 ## Create your own pipeline
 
 Create a JSON file with a `steps` list. Each step needs a `command` array:
