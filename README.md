@@ -11,18 +11,20 @@ fails, the pipeline stops and returns a non-zero exit status.
 
 ## Install
 
-From the repository directory:
+From a local checkout:
 
 ```bash
 python3 -m pip install .
 ```
 
-This installs the `script-chain` command. To install from a source checkout
-without installing:
+Or install the GitHub project with `pipx` for an isolated command-line app:
 
 ```bash
-python3 chain.py run examples/pipeline.json
+pipx install git+https://github.com/CadenMcCullenSoftware/script-chain-cli.git
 ```
+
+The GitHub CLI (`gh`) is required only for `repos discover`; other commands
+work offline against local checkouts.
 
 ## Quick start
 
@@ -37,13 +39,17 @@ under `examples/build/`, and prints progress as each step runs.
 
 ## Manage multiple repositories
 
-The `repos` commands use the included catalog, with optional persistent
-configuration under `~/.config/script-chain-cli/repos.json` (or
-`$XDG_CONFIG_HOME/script-chain-cli/repos.json`). Use `--config` on any `repos`
-subcommand to select another config file. For local operations, place each
-checkout under a workspace directory using its repository name (for example,
-`~/Projects/script-chain-cli`) and pass that directory with `--root`. An
-explicit configured checkout path can be set with `repos add --path`.
+The `repos` commands start with the included catalog. If a config file exists,
+it becomes the active catalog. The default config location is
+`~/.config/script-chain-cli/repos.json`, or
+`$XDG_CONFIG_HOME/script-chain-cli/repos.json` when set. Use `--config` on any
+`repos` subcommand to choose a different file.
+
+For local operations, put checkouts under one workspace directory using their
+repository names (for example, `~/Projects/script-chain-cli`) and pass it with
+`--root`. You can instead store a checkout path on an individual configured
+repository with `repos add --path`; absolute paths work regardless of `--root`,
+and relative paths are resolved from `--root`.
 
 ```bash
 script-chain repos list
@@ -51,45 +57,36 @@ script-chain repos status --root ~/Projects
 script-chain repos docs axiom-hive-code-review --root ~/Projects
 script-chain repos read-doc axiom-hive-code-review README.md --root ~/Projects
 script-chain repos checks --root ~/Projects
-script-chain repos add example-org/project --description "Example project"
+script-chain repos add example-org/project --description "Example project" \
+  --path /work/project
 script-chain repos remove project
 script-chain repos discover --owner CadenMcCullenSoftware
 script-chain repos discover --owner CadenMcCullenSoftware --import
 ```
 
-Discovery reads repository metadata using the authenticated GitHub CLI (`gh`);
-`--import` explicitly writes the discovered catalog to config. Inventory,
-status, and documentation commands are read-only. `repos checks` detects
-conventional test, lint, and build commands and only displays them by default.
-To execute checks, specify one or more repositories and explicitly pass
-`--run`. Use `--type` to limit the check categories:
+Discovery reads repositories visible to the authenticated GitHub CLI (`gh`).
+Without `--import`, it only prints the discovered list. With `--import`, it
+merges the results into the selected config file; it does not clone anything.
+Inventory, status, and documentation commands are read-only.
+
+`repos checks` detects supported test, lint, and build commands and only
+displays them by default. It recognizes npm scripts named `test`, `lint`, or
+`build`; Go test, vet, and build commands when `go.mod` exists; Python pytest
+or unittest tests; and configured Ruff or Flake8 linting. Detection is
+conventional and does not guarantee that required tools or dependencies are
+installed. To execute checks, specify one or more repositories and explicitly
+pass `--run`. Use `--type` to limit categories:
 
 ```bash
 script-chain repos checks script-chain-cli --root ~/Projects --run
 script-chain repos checks Delta-V1 --type lint --type test --root ~/Projects
 ```
 
-Checks time out after five minutes. The CLI does not clone, fetch, or pull
+Checks run sequentially and time out individually after five minutes. The CLI
+does not clone, fetch, or pull
 repositories and never runs checks across the whole catalog implicitly. Install
 the package to use the `script-chain` command, or run
 `python3 chain.py repos --help` from the source checkout.
-
-### Install for regular use
-
-Install from a local checkout:
-
-```bash
-python3 -m pip install .
-```
-
-Or install the GitHub project with `pipx` for an isolated command-line app:
-
-```bash
-pipx install git+https://github.com/CadenMcCullenSoftware/script-chain-cli.git
-```
-
-The GitHub CLI (`gh`) is only required for `repos discover`; other commands
-work offline against local checkouts.
 
 ## Create your own pipeline
 
@@ -148,6 +145,8 @@ could not start).
 ```bash
 script-chain --help
 script-chain run --help
+script-chain repos --help
+script-chain repos checks --help
 ```
 
 ## Tests
